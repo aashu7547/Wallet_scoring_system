@@ -22,3 +22,22 @@ Score each wallet (0–1000 scale) based on its interaction with Aave V2 — rew
 ---
 
 ## 📂 Project Structure
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+model = Sequential([
+    Dense(128, activation='relu', input_shape=(X_scaled.shape[1],)),
+    Dropout(0.3),
+    Dense(64, activation='relu'),
+    Dropout(0.2),
+    Dense(1, activation='sigmoid') 
+])
+
+model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+y = (
+    features.get("deposit", 0) +
+    features.get("repay", 0) -
+    features.get("liquidationcall", 0)
+).clip(lower=0)
+from sklearn.preprocessing import MinMaxScaler
+y_scaled = MinMaxScaler().fit_transform(y.values.reshape(-1, 1)).flatten()
+model.fit(X_scaled, y_scaled, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
